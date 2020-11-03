@@ -1,4 +1,4 @@
-function []=m_map_gcmfaces(fld,varargin);
+function out=m_map_gcmfaces(fld,varargin);
 %object:    gcmfaces front end to m_map
 %inputs:    fld is the 2D field to be mapped, or a cell (see below).
 %optional:  proj is either the index (integer; 0 by default) of pre-defined
@@ -15,6 +15,7 @@ function []=m_map_gcmfaces(fld,varargin);
 %               {'doFit',1} indicates to exclude white space (0 by default)
 %               {'myShading','flat'} indicates to use flat shading instead of interp
 %               {'myFontSize',12} indicates font size for axis labels (10 by default)
+%               {'box','off'} turns off grid box plotting ('on' by default)
 %
 %notes:     - for proj==0 (i.e. the default) three panels will be plotted :
 %           a mercator projection over mid-latitude, and two polar
@@ -53,7 +54,7 @@ end;
 if iscell(fld); myPlot=fld{1}; else; myPlot='pcolor'; fld={'pcolor',fld}; end;
 %set more optional paramaters to default values
 myCaxis=[]; myTitle=''; myShading='interp'; myCmap='jet'; myFontSize=10;
-do_m_coast=1; doHold=0; doCbar=1; doLabl=1; doFit=0;
+do_m_coast=1; doHold=0; doCbar=1; doLabl=1; doFit=0; box='on';
 %set more optional paramaters to user defined values
 for ii=2:nargin-1;
     if ~iscell(varargin{ii});
@@ -79,7 +80,8 @@ for ii=2:nargin-1;
                 strcmp(varargin{ii}{1},'doCbar')|...
                 strcmp(varargin{ii}{1},'doLabl')|...
                 strcmp(varargin{ii}{1},'doFit')|...
-                strcmp(varargin{ii}{1},'do_m_coast');
+                strcmp(varargin{ii}{1},'do_m_coast')|...
+		strcmp(varargin{ii}{1},'box');
             eval([varargin{ii}{1} '=varargin{ii}{2};']);
         else;
             warning('inputCheck:m_map_gcmfaces_3',...
@@ -116,10 +118,11 @@ param.doCbar=doCbar;
 param.doLabl=doLabl;
 param.doFit=doFit;
 param.myPlot=myPlot;
+param.box=box;
 
 %do the plotting:
 if (choicePlot~=0&choicePlot~=1&choicePlot~=2&choicePlot~=3);
-    do_my_plot(fld,param,choicePlot,myShading);
+    out=do_my_plot(fld,param,choicePlot,myShading);
 end;%if choicePlot==0|choicePlot==1;
 
 if choicePlot==0; subplot(2,1,1); end;
@@ -138,7 +141,7 @@ end;%if choicePlot==0|choicePlot==1;
 
 if choicePlot==0; subplot(2,2,4); end;
 if choicePlot==0|choicePlot==3;
-    do_my_plot(fld,param,3,myShading);
+    out=do_my_plot(fld,param,3,myShading);
 end;%if choicePlot==0|choicePlot==1;
 
 if plotCBAR==2&strcmp(myPlot,'pcolor')&doCbar;
@@ -168,8 +171,8 @@ if doFit;
     set(gcf,'PaperPosition',[0 4 8 8/tmp1(1)]);
 end;
 
-function []=do_my_plot(fld,param,proj,shad);
 
+function out=do_my_plot(fld,param,proj,shad);
 gcmfaces_global;
 
 %default m_grid params:
@@ -198,6 +201,70 @@ elseif proj==1.3;
     m_proj('Equidistant cylindrical','lat',[-90 -12],'lon',[0 360]+20);
     myConv='pcol';
     xtic=[-360:60:360]; ytic=[-90:30:90];
+elseif proj==1.11;%Atlantic centred
+    m_proj('Mercator','lat',[-70 0],'lon',[30 360]+140);
+    myConv='pcol';
+    xtic=[30:60:360+140]; ytic=[-60:30:0];
+elseif proj==1.12;%Pacific centred
+    m_proj('Mercator','lat',[-70 0],'lon',[0 330]+20);
+    myConv='pcol';
+    xtic=[0:60:360]; ytic=[-60:30:0];
+elseif proj==1.13;%IndoAustr centred
+    m_proj('Mercator','lat',[-70 0],'lon',[30 360]-150);
+    myConv='pcol';
+    xtic=[30-150:60:360]; ytic=[-60:30:0];
+elseif proj==1.14;%S America zoom
+    m_proj('Mercator','lat',[-60 -20],'lon',[240 360]);
+    myConv='pcol';
+    xtic=[240:30:360]; ytic=[-60:20:-20];
+elseif proj==1.15;%SE Pac zoom
+    m_proj('Mercator','lat',[-70 -40],'lon',[240 330]);
+    myConv='pcol';
+    xtic=[240:30:330]; ytic=[-70:15:-40];
+elseif proj==1.16;%NZ zoom
+    m_proj('Mercator','lat',[-60 -20],'lon',[120 210]);
+    myConv='pcol';
+    xtic=[120:30:210]; ytic=[-60:15:-20];
+elseif proj==1.17%W Africa zoom
+    m_proj('Mercator','lat',[-50 15],'lon',[-45 45]);
+    myConv='pcol';
+    xtic=[-30:30:30]; ytic=[-30:30:15];
+elseif proj==1.18%E Africa zoom
+    m_proj('Mercator','lat',[-30 15],'lon',[30 90]);
+    myConv='pcol';
+    xtic=[30:30:90]; ytic=[-30:30:15];
+elseif proj==1.19;%Atlantic zoom
+    m_proj('Mercator','lat',[-70 -30],'lon',[-60 30]);
+    myConv='pcol';
+    xtic=[-60:30:30]; ytic=[-60:30:-30];
+elseif proj==1.21;%Pacific zoom
+    m_proj('Mercator','lat',[-70 -30],'lon',[-180 -60]);
+    myConv='pcol';
+    xtic=[-180:30:-60]; ytic=[-60:30:-30];
+elseif proj==1.22;%Indian zoom
+    m_proj('Mercator','lat',[-70 -30],'lon',[30 180]);
+    myConv='pcol';
+    xtic=[30:30:180]; ytic=[-60:30:-30];
+elseif proj==1.23;%Atlantic cut
+    m_proj('Mercator','lat',[-70 30],'lon',[-60 30]);
+    myConv='pcol';
+    xtic=[-60:30:30]; ytic=[-60:30:30];
+elseif proj==1.24;%Pacific cut
+    m_proj('Mercator','lat',[-70 0],'lon',[-180 -60]);
+    myConv='pcol';
+    xtic=[-180:30:-60]; ytic=[-60:30:30];
+elseif proj==1.25;%Indian cut
+    m_proj('Mercator','lat',[-70 30],'lon',[30 180]);
+    myConv='pcol';
+    xtic=[30:30:180]; ytic=[-60:30:30];
+elseif proj==1.26;%Indian cut
+    m_proj('Mercator','lat',[-70 0],'lon',[30 180]);
+    myConv='pcol';
+    xtic=[30:30:180]; ytic=[-60:30:0];
+elseif proj==1.27;%Pacific cut
+    m_proj('Mercator','lat',[-70 0],'lon',[150 360-90]);
+    myConv='pcol';
+    xtic=[150:30:270]; ytic=[-60:30:0];
 elseif proj==2;
     m_proj('Stereographic','lon',0,'lat',90,'rad',40);
     myConv='convert2arctic';
@@ -218,8 +285,24 @@ elseif proj==4.1;
     m_proj('mollweide','lat',[25 75],'lon',[-100 30]);
     myConv='pcol';
     xtic=[-100:20:30]; ytic=[30:10:70];
+elseif proj==4.11;
+    m_proj('mollweide','lat',[40 75],'lon',[-100 -10]);
+    myConv='pcol';
+    xtic=[-100:20:30]; ytic=[30:10:70];
+elseif proj==4.12;
+    m_proj('mollweide','lat',[0 85],'lon',[-100 30]);
+    myConv='pcol';
+    xtic=[-100:20:30]; ytic=[-80:20:80];
+elseif proj==4.13;
+    m_proj('mollweide','lat',[30 80],'lon',[-80 20]);
+    myConv='pcol';
+    xtic=[-100:20:30]; ytic=[30:20:80];
 elseif proj==4.2;
     m_proj('mollweide','lat',[-30 30],'lon',[-65 20]);
+    myConv='pcol';
+    xtic=[-60:10:20]; ytic=[-30:10:30];
+elseif proj==4.22;
+    m_proj('mollweide','lat',[-50 50],'lon',[-90 20]);
     myConv='pcol';
     xtic=[-60:10:20]; ytic=[-30:10:30];
 elseif proj==4.3;
@@ -252,8 +335,7 @@ end;
 
 if ~param.doLabl; xticlab=0; yticlab=0;end; %omit labels
 
-m_grid_opt=['''XaxisLocation'',xloc,''YaxisLocation'',yloc'];
-m_grid_opt=[m_grid_opt ',''xtick'',xtic,''ytick'',ytic'];
+m_grid_opt=['''XaxisLocation'',xloc,''YaxisLocation'',yloc,''xtick'',xtic,''ytick'',ytic,''box'',param.box'];
 if xticlab==0; m_grid_opt=[m_grid_opt ',''xticklabel'',[]']; end;
 if yticlab==0; m_grid_opt=[m_grid_opt ',''yticklabel'',[]']; end;
 m_grid_opt=[m_grid_opt ',''fontsize'',param.myFontSize'];
@@ -277,7 +359,7 @@ if strcmp(param.myPlot,'pcolor')|strcmp(param.myPlot,'contour')||strcmp(param.my
     end;
     [x,y]=m_ll2xy(xx,yy);
     if strcmp(param.myPlot,'pcolor');
-        if sum(~isnan(x(:)))>0; pcolor(x,y,z); eval(['shading ' shad ';']); end;
+        if sum(~isnan(x(:)))>0; out=pcolor(x,y,z); eval(['shading ' shad ';']); end;
         if param.plotCBAR==0;
             colormap(param.myCmap); if param.doCbar; colorbar; end;
         elseif param.plotCBAR==1;
@@ -293,14 +375,14 @@ if strcmp(param.myPlot,'pcolor')|strcmp(param.myPlot,'contour')||strcmp(param.my
             eval(['m_grid(' m_grid_opt ');']);
         end;
         if length(fld)==2; fld{3}='k'; end;
-        hold on; contour(x,y,z,fld{3:end});
+        hold on; out=contour(x,y,z,fld{3:end});
     elseif strcmp(param.myPlot,'contourf');
+        if length(fld)==2; fld{3}='k'; end;
+        hold on; out=contourf(x,y,z,fld{3:end});
         if ~param.doHold;
             if param.do_m_coast; m_coast('patch',[1 1 1]*.7,'edgecolor','none'); end;
             eval(['m_grid(' m_grid_opt ');']);
         end;
-        if length(fld)==2; fld{3}='k'; end;
-        hold on; contourf(x,y,z,fld{3:end});
     end;
 elseif strcmp(param.myPlot,'plot');
     if ~param.doHold;
@@ -309,7 +391,7 @@ elseif strcmp(param.myPlot,'plot');
     end;
     [x,y]=m_map_fix_range(fld{2},fld{3});
     [x,y]=m_ll2xy(x,y);
-    hold on; plot(x,y,fld{4:end});
+    hold on; out=plot(x,y,fld{4:end});
 elseif strcmp(param.myPlot,'scatter');
     if ~param.doHold;
         if param.do_m_coast; m_coast('patch',[1 1 1]*.7,'edgecolor','none'); end;
@@ -330,5 +412,3 @@ end;
 
 %add tag spec. to map & proj generated with this routine
 set(gca,'Tag',['gfMap' num2str(proj)]);
-
-  

@@ -1,4 +1,4 @@
-function []=m_map_gcmfaces_movie(dirFld,nameFld,varargin);
+function []=m_map_gcmfaces_movie(dirFld,nameFld,mygrid,varargin);
 
 %check that m_map is in the path
 aa=which('m_proj'); if isempty(aa); error('this function requires m_map that is missing'); end;
@@ -58,7 +58,7 @@ tt_txt=[tt_txt num2str(tt)];;
 if inadmod==0; tt2=tt; else; tt2=nt-tt; end;
 if tt2<10; tt2_txt='000'; elseif tt2<100; tt2_txt='00'; elseif tt2<1000; tt2_txt='0'; else; tt2_txt=''; end;
 tt2_txt=[tt2_txt num2str(tt2)];;
-m_map_gcmfaces(mask.*fld(:,:,tt),p,cc); title([nameFld ' ' tt2_txt],'Interpreter','none');
+m_map_gcmfaces(mask.*fld(:,:,tt),p,{'myCaxis',cc}); title([nameFld ' ' tt2_txt],'Interpreter','none');
 eval(['print -dtiff tmp_' nameFld '_' num2str(k) '_' tt_txt '.tiff']);
 system(['convert tmp_' nameFld '_' num2str(k) '_' tt_txt '.tiff tmp_' nameFld '_' num2str(k) '_' tt_txt '.gif']);
 end;
